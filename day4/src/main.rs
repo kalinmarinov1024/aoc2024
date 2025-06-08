@@ -1,7 +1,6 @@
-use std::fs;
+use std::{fs, usize};
 
 const INPUT_PATH: &str = "input.txt";
-const XMAS_LENGTH: usize = 4;
 
 fn main() {
     println!("Hello, world!");
@@ -12,82 +11,75 @@ fn main() {
 
 fn part_one(input: String) -> usize {
     let mut occurs = 0;
-    let lines = input.lines().count();
 
-    for (idx, line) in input.lines().enumerate() {
-        for (c_idx, _) in line.chars().enumerate() {
-            let mut vec: Vec<char> = Vec::new();
-            occurs += dfs(
-                &input,
-                idx,
-                c_idx as i32,
-                &mut vec,
-                lines,
-                line.len() as i32,
-            );
+    let is_xmas = |s| s == "XMAS" || s == "SAMX";
+
+    let input = parse_input(input);
+    let xlen = input[0].len();
+    let ylen = input.len();
+
+    for x in 0..xlen - 3 {
+        for y in 0..ylen {
+            if is_xmas(format!(
+                "{}{}{}{}",
+                input[y][x],
+                input[y][x + 1],
+                input[y][x + 2],
+                input[y][x + 3]
+            )) {
+                occurs += 1;
+            }
+        }
+    }
+
+    // Vertical
+    for x in 0..xlen {
+        for y in 0..ylen - 3 {
+            if is_xmas(format!(
+                "{}{}{}{}",
+                input[y][x],
+                input[y + 1][x],
+                input[y + 2][x],
+                input[y + 3][x]
+            )) {
+                occurs += 1;
+            }
+        }
+    }
+
+    // First diagonal
+    for x in 0..xlen - 3 {
+        for y in 0..ylen - 3 {
+            if is_xmas(format!(
+                "{}{}{}{}",
+                input[y][x],
+                input[y + 1][x + 1],
+                input[y + 2][x + 2],
+                input[y + 3][x + 3]
+            )) {
+                occurs += 1;
+            }
+        }
+    }
+
+    // Second diagonal
+    for x in 3..xlen {
+        for y in 0..ylen - 3 {
+            if is_xmas(format!(
+                "{}{}{}{}",
+                input[y][x],
+                input[y + 1][x - 1],
+                input[y + 2][x - 2],
+                input[y + 3][x - 3]
+            )) {
+                occurs += 1;
+            }
         }
     }
 
     occurs
 }
 
-fn dfs(
-    input: &String,
-    line_idx: usize,
-    char_idx: i32,
-    uniques: &mut Vec<char>,
-    max_lines: usize,
-    line_chars: i32,
-) -> usize {
-    if line_idx == max_lines || char_idx == -1 || char_idx == line_chars {
-        return 0;
-    }
-
-    let curr_char = input
-        .lines()
-        .nth(line_idx)
-        .unwrap()
-        .chars()
-        .nth(char_idx as usize)
-        .unwrap();
-
-    if uniques.contains(&curr_char) {
-        return 0;
-    }
-
-    uniques.push(curr_char);
-
-    if uniques.len() == XMAS_LENGTH {
-        return 1;
-    }
-
-    return dfs(
-        &input,
-        line_idx,
-        char_idx + 1,
-        &mut uniques.clone(),
-        max_lines,
-        line_chars,
-    ) + dfs(
-        &input,
-        line_idx + 1,
-        char_idx - 1,
-        &mut uniques.clone(), //copies, as otherwise it gets filled by other dfs branches
-        max_lines,
-        line_chars,
-    ) + dfs(
-        &input,
-        line_idx + 1,
-        char_idx,
-        &mut uniques.clone(),
-        max_lines,
-        line_chars,
-    ) + dfs(
-        input,
-        line_idx + 1,
-        char_idx + 1,
-        &mut uniques.clone(),
-        max_lines,
-        line_chars,
-    );
+fn parse_input(input: String) -> Vec<Vec<char>> {
+    input.lines().map(|l| l.chars().collect()).collect()
 }
