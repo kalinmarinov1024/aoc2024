@@ -6,7 +6,7 @@ fn main() {
     println!("Hello, world!");
 
     let input: String = fs::read_to_string(INPUT_PATH).unwrap();
-    println!("res: {}", part_one(input));
+    println!("res: {}", part_two(input));
 }
 
 fn part_one(input: String) -> usize {
@@ -72,6 +72,39 @@ fn part_one(input: String) -> usize {
                 input[y + 2][x - 2],
                 input[y + 3][x - 3]
             )) {
+                occurs += 1;
+            }
+        }
+    }
+
+    occurs
+}
+
+fn part_two(input: String) -> usize {
+    let mut occurs = 0;
+
+    let is_x_mas = |s1, s2| (s1 == "MAS" || s1 == "SAM") && (s2 == "SAM" || s2 == "MAS");
+
+    let input = parse_input(input);
+    let xlen = input[0].len();
+    let ylen = input.len();
+
+    for x in 0..xlen - 2 {
+        for y in 0..ylen - 2 {
+            if is_x_mas(
+                format!(
+                    "{}{}{}",
+                    input[y][x],
+                    input[y + 1][x + 1],
+                    input[y + 2][x + 2]
+                ),
+                format!(
+                    "{}{}{}",
+                    input[y][x + 2],
+                    input[y + 1][x + 1],
+                    input[y + 2][x]
+                ),
+            ) {
                 occurs += 1;
             }
         }
