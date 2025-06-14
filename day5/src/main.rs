@@ -21,13 +21,8 @@ fn print_queue_1(input: String) -> usize {
         let correct = is_line_corrent(&map, line.to_string());
 
         if correct {
-            let numbers: Vec<&str> = line.split(',').collect();
-            let upgrade_order: Vec<String> = numbers.iter().map(|s| s.to_string()).collect();
-            let mid_elem: usize = upgrade_order
-                .get(upgrade_order.len() / 2)
-                .unwrap()
-                .parse()
-                .unwrap();
+            let numbers: Vec<usize> = line.split(',').map(|x| x.parse().unwrap()).collect();
+            let mid_elem: usize = numbers.get(numbers.len() / 2).unwrap().to_owned();
             mid_elements += mid_elem;
         }
     }
@@ -47,9 +42,8 @@ fn print_queue_2(input: String) -> usize {
         let correct = is_line_corrent(&map, line.to_string());
 
         if !correct {
-            let numbers: Vec<&str> = line.split(',').collect();
-            let upgrade_order: Vec<String> = numbers.iter().map(|s| s.to_string()).collect();
-            let mid_elem: usize = reorder_and_get_mid(&upgrade_order, &map);
+            let numbers: Vec<usize> = line.split(',').map(|x| x.parse().unwrap()).collect();
+            let mid_elem: usize = reorder_and_get_mid(&numbers, &map);
             mid_elements += mid_elem;
         }
     }
@@ -59,18 +53,15 @@ fn print_queue_2(input: String) -> usize {
 
 // we know that by the upgrade rules, going to the right of the line, the number will have
 // fewer matching next numbers.
-fn reorder_and_get_mid(upgrade_order: &Vec<String>, map: &HashMap<usize, Vec<usize>>) -> usize {
+fn reorder_and_get_mid(upgrade_order: &Vec<usize>, map: &HashMap<usize, Vec<usize>>) -> usize {
     let mut order: Vec<usize> = Vec::new();
     let order_size = upgrade_order.len();
     order.resize(order_size, 0);
 
-    for x in upgrade_order.iter() {
+    for current in upgrade_order.iter() {
         let mut idx_in_order = order_size;
-        let current: usize = x.parse().unwrap();
 
-        for y in upgrade_order.iter() {
-            let next: usize = y.parse().unwrap();
-
+        for next in upgrade_order.iter() {
             if current == next {
                 continue;
             }
@@ -81,23 +72,19 @@ fn reorder_and_get_mid(upgrade_order: &Vec<String>, map: &HashMap<usize, Vec<usi
             }
         }
 
-        order[idx_in_order - 1] = current;
+        order[idx_in_order - 1] = current.clone();
     }
 
     order.get(order.len() / 2).unwrap().clone()
 }
 
 fn is_line_corrent(map: &HashMap<usize, Vec<usize>>, line: String) -> bool {
-    let numbers: Vec<&str> = line.split(',').collect();
-    let upgrade_order: Vec<String> = numbers.iter().map(|s| s.to_string()).collect();
+    let numbers: Vec<usize> = line.split(',').map(|x| x.parse().unwrap()).collect();
 
     let mut correct = true;
-    for (x_pos, x) in upgrade_order.iter().enumerate() {
-        let current: usize = x.parse().unwrap();
-
-        for y in upgrade_order.iter().skip(x_pos + 1) {
-            let next: usize = y.parse().unwrap();
-            if map.contains_key(&current) && map.get(&current).unwrap().contains(&next) {
+    for (x_pos, current) in numbers.iter().enumerate() {
+        for y in numbers.iter().skip(x_pos + 1) {
+            if map.contains_key(&current) && map.get(&current).unwrap().contains(&y) {
                 continue;
             }
 
